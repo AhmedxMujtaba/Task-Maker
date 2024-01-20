@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <vector>
 #include <array>
@@ -26,8 +26,10 @@ void addTaskHandler();
 void displayMenu();
 void display(string option);
 void displaySpecificPersonTask();
+void displaySpecificPersonTask(int index);
 void displayAllPersonsTasks();
 void displayAllPersons();
+void markTaskStatus();
 
 
 int main() {
@@ -44,7 +46,7 @@ void displayMenu() {
         cout << "Select the option: " << endl;
         cout << "1-Add person: " << endl;
         cout << "2-Add task for person: " << endl;
-        cout << "3-Mark task as done: " << endl;
+        cout << "3-Mark task Status: " << endl;
         cout << "4-Delete task: " << endl;
         cout << "5-Delete person: " << endl;
         cout << "6-Display all persons" << endl;
@@ -63,6 +65,7 @@ void displayMenu() {
             addTaskHandler();
             break;
         case 3:
+            markTaskStatus();
             break;
         case 4:
             break;
@@ -260,41 +263,101 @@ void display(string option) {
 }
 
 void displaySpecificPersonTask() {
-
     int i = indexFinder();
 
-    cout << "ID" << setw(10) << "Name" << endl;
-    cout << personVector[i].id << setw(10) << personVector[i].name << endl;
+    cout << setw(5) << "ID" << setw(15) << "Name" << endl;
+    cout << setw(5) << personVector[i].id << setw(15) << personVector[i].name << endl;
     cout << endl;
 
-    for (size_t j = 0; j < personVector[i].tasksVector.size(); j++)
-    {
+    for (size_t j = 0; j < personVector[i].tasksVector.size(); j++) {
         Task task = personVector[i].tasksVector[j];
-        cout << "Task-" << j + 1 << setw(3) << task.description << "Status:" << setw(3) << (task.isCompleted == true ? "Completed" : "Incomplete") << endl;
+        cout << setw(5) << "Task-" << j + 1 << setw(15) << task.description << setw(10) << "Status:" << setw(5) << (task.isCompleted == true ? "O" : "X") << endl;
     }
 }
-void displayAllPersonsTasks(){
 
-    for (size_t i = 0; i < personVector.size(); i++)
-    {
-        cout << "ID" << setw(10) << "Name" << endl;
-        cout << personVector[i].id << setw(10) << personVector[i].name << endl;
+void displaySpecificPersonTask(int index) {
+    int i = index;
+
+    cout << setw(5) << "ID" << setw(15) << "Name" << endl;
+    cout << setw(5) << personVector[i].id << setw(15) << personVector[i].name << endl;
+    cout << endl;
+
+    for (size_t j = 0; j < personVector[i].tasksVector.size(); j++) {
+        Task task = personVector[i].tasksVector[j];
+        cout << setw(5) << "Task-" << j + 1 << setw(15) << task.description << setw(10) << "Status:" << setw(5) << (task.isCompleted == true ? "O" : "X") << endl;
+    }
+}
+
+void displayAllPersonsTasks() {
+    cout << setw(5) << "ID" << setw(15) << "Name" << endl;
+
+    for (size_t i = 0; i < personVector.size(); i++) {
+        cout << setw(5) << personVector[i].id << setw(15) << personVector[i].name << endl;
         cout << endl;
-        for (size_t j = 0; j < personVector[i].tasksVector.size(); j++) 
-        {
+
+        for (size_t j = 0; j < personVector[i].tasksVector.size(); j++) {
             Task task = personVector[i].tasksVector[j];
-            cout << "Task-" << j + 1 << setw(3) << task.description << "Status:" << setw(3) << (task.isCompleted == true ? "Completed" : "Incomplete") << endl;
+            cout << setw(5) << "Task-" << j + 1 << setw(15) << task.description << setw(10) << "Status:" << setw(5) << (task.isCompleted == true ? "O" : "X") << endl;
         }
     }
 }
 
-void displayAllPersons(){
+void displayAllPersons() {
+    cout << setw(5) << "ID" << setw(15) << "Name" << endl;
 
-    cout << "ID" << setw(10) << "Name"<< endl;
-    for (size_t i = 0; i < personVector.size(); i++)
-    {
-        cout << personVector[i].id << setw(10) << personVector[i].name << endl;
+    for (size_t i = 0; i < personVector.size(); i++) {
+        cout << setw(5) << personVector[i].id << setw(15) << personVector[i].name << endl;
     }
 }
 
+void markTaskStatus()
+{
+    //first we need to get the tasks for the person
+    int index = indexFinder();
+    displaySpecificPersonTask(index);
 
+    cout << "Select Task Number to Mark as Completed/Incomplete:" << endl;
+    cout << "Task Number: " << endl;
+
+    Person person = personVector[index];
+    vector <Task> currentTaskVector = person.tasksVector;
+    
+    int taskNumber;
+    cin >> taskNumber;
+    
+    if(taskNumber > currentTaskVector.size())
+    {
+        cout << "Invalid Task Number:" << endl;
+        return;
+    }
+
+    //reducing 1 because index beign from 0 of the Task vecotor containing tasks of the person.
+    taskNumber -= 1;
+
+    Task currentTask = currentTaskVector[taskNumber];
+    
+    cout << "Mark Task as: " << endl;
+    cout << "1- Complete: " << endl;
+    cout << "2- Incomplete: " << endl;
+    cout << "0- Cancel: " << endl;
+
+    int option;
+    cin >> option;
+
+    switch (option)
+    {
+    case 0:
+        break;
+    case 1:
+        currentTask.isCompleted = true;
+        cout << "Task Completed " << endl;
+        break;
+    case 2:
+        currentTask.isCompleted = false;
+        cout << "Task Incomplete " << endl;
+        break;
+    default:
+        cout << "Invalid Option " << endl;
+        break;
+    }
+}
