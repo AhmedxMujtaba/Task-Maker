@@ -30,6 +30,8 @@ void displaySpecificPersonTask(int index);
 void displayAllPersonsTasks();
 void displayAllPersons();
 void markTaskStatus();
+void deletePerson();
+void deleteTask();
 
 
 int main() {
@@ -68,8 +70,10 @@ void displayMenu() {
             markTaskStatus();
             break;
         case 4:
+            deleteTask();
             break;
         case 5:
+            deletePerson();
             break;
         case 6:
             display("people");
@@ -81,7 +85,7 @@ void displayMenu() {
             display("all tasks");
             break;
         case 9:
-            
+            return;
             break;
         default:
             cout << "Invalid Option!!";
@@ -91,27 +95,26 @@ void displayMenu() {
 }
 
 string idGenerator() {
+    string newID, lastID, lastIdNumberString;
 
-    //generation of IDs
-    string id, idNum;
-    bool idExists = false;
-    do {
-        // Generate a new ID
-        idNum = to_string(rand() % 1000 + 1); // Generates a random number between 1 and 1000
-        id = "ID-" + idNum;
-        // Check if the ID already 
-        for (size_t i = 0; i < personVector.size(); i++) {
+    if (personVector.empty()) {
+        // If the vector is empty, generate the first ID
+        newID = "ID-1";
+    }
+    else {
+        // Get the last ID in personVector
+        lastID = personVector.back().id;
+        // Extract the numeric part from the last ID
+        lastIdNumberString = lastID.substr(3);
+        // Convert the numeric part to an integer
+        int lastIdNumber = stoi(lastIdNumberString);
+        // Increment the numeric part
+        lastIdNumber += 1;
+        // Generate the new ID
+        newID = "ID-" + to_string(lastIdNumber);
+    }
 
-            if (personVector[i].id == id) {
-                id = idGenerator();
-                break;
-            }
-        }
-        idExists = true;
-
-    } while (!idExists); // Keep generating a new ID until a unique one is found
-
-    return id;
+    return newID;
 }
 
 int indexFinder() {
@@ -125,8 +128,8 @@ int indexFinder() {
 
     switch (option) {
     case 1:
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Enter Name: ";
-        cin.ignore();  // Ignore the newline character left in the buffer
         getline(cin, name);
 
         for (size_t i = 0; i < personVector.size(); i++) {
@@ -156,6 +159,7 @@ int indexFinder() {
                 break;
             }
         }
+
         cout << "The ID does not exist." << endl;
         return -1;
         break;
@@ -209,36 +213,24 @@ void addTaskHandler() {
 }
 
 void addTask(int index) {
+    char option;
 
-    
+    do {
         string taskDescription;
         cout << "Enter Task: ";
-
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         getline(cin, taskDescription);
-        
-        Person person;
-        Task task;
 
+        Task task;
         task.description = taskDescription;
         task.isCompleted = false;
 
         personVector[index].tasksVector.push_back(task);
-
         cout << "Create another task? (Y/N): ";
-        char option;
         cin >> option;
+       
 
-        switch (tolower(option)) {
-        case 'y':
-            addTask(index);
-            break;
-        case 'n':
-            return; // Exit the loop
-        default:
-            cout << "Invalid Option" << endl;
-            return; // Exit the loop
-        }
-    
+    } while (tolower(option) == 'y');
 }
 
 void display(string option) {
@@ -292,13 +284,17 @@ void displayAllPersonsTasks() {
     cout << setw(5) << "ID" << setw(15) << "Name" << endl;
 
     for (size_t i = 0; i < personVector.size(); i++) {
+        cout <<"---------------------------------------------------------------------------"<< endl;
         cout << setw(5) << personVector[i].id << setw(15) << personVector[i].name << endl;
         cout << endl;
 
         for (size_t j = 0; j < personVector[i].tasksVector.size(); j++) {
             Task task = personVector[i].tasksVector[j];
             cout << setw(5) << "Task-" << j + 1 << setw(15) << task.description << setw(10) << "Status:" << setw(5) << (task.isCompleted == true ? "O" : "X") << endl;
+            
         }
+        cout << "---------------------------------------------------------------------------" << endl;
+        cout << endl;
     }
 }
 
@@ -360,4 +356,77 @@ void markTaskStatus()
         cout << "Invalid Option " << endl;
         break;
     }
+
+    personVector[index].tasksVector[taskNumber].isCompleted = currentTask.isCompleted;
+}
+void deletePerson() {
+
+    int index = indexFinder();
+    displaySpecificPersonTask(index);
+    string name;
+    personVector[index].name == name;
+    cout << endl;
+    cout<< "Remove '"<< name <<"' from the Database?\nPress 1 to Confirm, 0 to Cancel" << endl;
+    int option;
+    cin >> option;
+    if (option == 1) {
+        // Check if the index is valid
+        if (index >= 0 && index < personVector.size()) {
+            personVector.erase(personVector.begin() + index);
+
+        }
+        else 
+        {
+            std::cout << "Invalid index.\n";
+        }
+    }
+    else
+    {
+        cout << "Cancled.\n";
+    }
+}
+
+void deleteTask() {
+
+    int index = indexFinder();
+    displaySpecificPersonTask(index);
+
+    cout << "Select Task Number to Delete" << endl;
+    cout << "Task Number: " << endl;
+    int taskNumber;
+    cin >> taskNumber;
+
+    Person person = personVector[index];
+    vector <Task> currentTaskVector = person.tasksVector;
+
+    
+
+    if (taskNumber > currentTaskVector.size())
+    {
+        cout << "Invalid Task Number:" << endl;
+        return;
+    }
+
+    //reducing 1 because index beign from 0 of the Task vecotor containing tasks of the person.
+    taskNumber -= 1;
+
+    cout << "Confirm To Delete Task: " << endl;
+    cout << "1- Confirm: " << endl;
+    cout << "0- Cancel: " << endl;
+
+    int option;
+    cin >> option;
+
+    if (option == 1){
+        currentTaskVector.erase(currentTaskVector.begin() + taskNumber);
+        personVector[index].tasksVector = currentTaskVector;
+        cout << "Task-" << taskNumber + 1 << " Deleted " <<endl;
+
+    }
+    else {
+        cout << "Cancelling" << endl;
+        return;
+    }
+
+    personVector[index].tasksVector = currentTaskVector;
 }
